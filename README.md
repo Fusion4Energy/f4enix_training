@@ -46,15 +46,15 @@ a FISPACT-II output) are used where the ITER_1D model does not show a given feat
 
 ## Setup
 
-You need Python 3.11+ and the F4Enix package.
+You need Python 3.11+, the ``f4enix`` and the ``ipykernel`` package.
 
 ```powershell
 # create and activate an environment (conda example)
-conda create -n f4enix_workshop python=3.11
+conda create -n f4enix_workshop python=3.12
 conda activate f4enix_workshop
 
 # install the requirements
-pip install -r requirements.txt
+pip install f4enix ipykernel
 ```
 
 Then check everything is in place:
@@ -65,13 +65,7 @@ python check_setup.py
 
 You should see a version number for F4Enix and `ALL CHECKS PASSED`.
 
-Finally, launch Jupyter from this folder:
-
-```powershell
-jupyter lab
-```
-
-and open `notebooks/00_setup_and_python_refresher.ipynb`.
+Now you are ready to move to the [first notebook](notebooks/00_setup_and_python_refresher.ipynb).
 
 ## Folder layout
 

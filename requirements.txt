@@ -1,7 +1,0 @@
-# F4Enix workshop requirements.
-# f4enix pulls in numpy, pandas, polars, pyvista, numjuggler, python-docx, openpyxl, ...
-f4enix
-
-# notebook environment
-ipykernel
-matplotlib
