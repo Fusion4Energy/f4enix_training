@@ -1,12 +1,9 @@
 # F4Enix hands-on workshop
 
-A ~2 h 30 training on [F4Enix](https://f4enix.readthedocs.io/en/latest/): a Python API to read,
+A roughly 2.5 hours training on [F4Enix](https://f4enix.readthedocs.io/en/latest/): a Python API to read,
 build and post-process MCNP models.
 
-The session is split in two parts:
-
-1. **Presentation** (~40 min) – what F4Enix is and what it can do.
-2. **Hands-on** (~1 h 50) – the five notebooks in [`notebooks/`](notebooks).
+The training consists of five notebooks in [`notebooks/`](notebooks).
 
 Everything runs **offline**. You never need to run MCNP, and you do not need a nuclear data
 library (`xsdir`) installed: all the MCNP files used during the session are already in
@@ -21,7 +18,7 @@ library (`xsdir`) installed: all the MCNP files used during the session are alre
 | 02 | `02_materials_tallies_and_run_settings.ipynb` | Materials, library translation, densities, tallies, NPS, void check | ~30 min |
 | 03 | `03_parsing_outp_and_mctal.ipynb` | Is the run trustworthy? Warnings, tables, statistical checks, lost particles, tally results | ~30 min |
 | 04 | `04_mesh_tallies_plots_and_weight_windows.ipynb` | Mesh tallies to VTK, slice plots, Word atlas, weight windows and GVR | ~30 min |
-| 05 | `05_fispact_activation_studies.ipynb` | FISPACT activation: spectra and collapse inputs, irradiation scenarios, dose/decay heat/pathways | ~20 min |
+| 05 | `05_fispact_activation_studies.ipynb` | FISPACT activation: spectrum, collapse/condense and inventory inputs; dose, decay heat, activity and pathways from the output | ~25 min |
 
 Each notebook ends with one or two exercises. Solutions are in [`solutions/`](solutions) —
 try the exercise first!

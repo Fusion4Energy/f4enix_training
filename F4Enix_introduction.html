@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F4Enix — an introduction</title>
+<style>
+  :root {
+    --paper: #f4f6f9;
+    --paper-2: #e6ebf2;
+    --ink: #132a5c;
+    --ink-2: #2a3a5c;
+    --muted: #66708a;
+    --rule: #cfd7e3;
+    --fire: #1f5fbf;
+    --fire-soft: #fff2c2;
+    --ember: #f5b821;
+    --sea: #2f6f73;
+    --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+    --sans: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --mono: "Cascadia Code", "Cascadia Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0b1730; }
+  body { font-family: var(--sans); color: var(--ink); -webkit-font-smoothing: antialiased; }
+  p, h1, h2, h3, h4, ul, ol { margin: 0; }
+  a { color: inherit; }
+
+  /* 1600×900 stage scaled to the window */
+  .viewport { position: fixed; inset: 0; display: grid; place-items: center; }
+  .stage { position: relative; width: 1600px; height: 900px; flex: none; overflow: hidden; background: var(--paper); }
+  .slide {
+    position: absolute; inset: 0; opacity: 0; visibility: hidden; transition: opacity .35s ease, visibility .35s;
+    background-color: var(--paper);
+    background-image: linear-gradient(var(--paper-2) 1px, transparent 1px), linear-gradient(90deg, var(--paper-2) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .slide.active { opacity: 1; visibility: visible; }
+  .slide.dark { background: var(--ink); color: var(--paper); }
+
+  .meta, .foot { position: absolute; left: 96px; right: 96px; display: flex; justify-content: space-between; font: 500 14px var(--mono); letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+  .meta { top: 40px; padding-bottom: 14px; border-bottom: 1px solid var(--rule); }
+  .meta b { color: var(--fire); font-weight: 600; }
+  .foot { bottom: 34px; letter-spacing: 1px; }
+  .dark .meta, .dark .foot { color: #8fa0c4; border-color: #2a4277; }
+  .content { position: absolute; top: 116px; bottom: 86px; left: 96px; right: 96px; }
+
+  h2 { font: 500 66px/1.04 var(--serif); letter-spacing: -1.2px; max-width: 1180px; }
+  h2 em { font-style: italic; color: var(--fire); background: linear-gradient(transparent 64%, var(--ember) 64%, var(--ember) 90%, transparent 90%); padding: 0 6px; }
+  .dark h2 em { color: var(--ember); background: none; padding: 0; }
+  .kicker { font: 600 15px var(--mono); letter-spacing: 3px; text-transform: uppercase; color: var(--fire); margin-bottom: 18px; }
+  .kicker::before { content: ""; display: inline-block; width: 30px; height: 6px; margin-right: 14px; vertical-align: middle; background: var(--ember); }
+  .lede { font-size: 27px; line-height: 1.45; color: var(--ink-2); max-width: 1000px; }
+  .muted { color: var(--muted); }
+  code, .mono { font-family: var(--mono); }
+  .pill { display: inline-flex; align-items: center; gap: 10px; padding: 10px 18px; border-radius: 999px; background: var(--ink); color: var(--paper); font: 500 21px var(--mono); }
+  .pill::before { content: "$"; color: var(--ember); }
+
+  /* staggered entrance */
+  .slide.active .rise { animation: rise .6s cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--d, 0) * 90ms + 80ms); }
+  @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+
+  /* code */
+  .code { background: var(--ink); color: #e8edf7; border-radius: 6px; padding: 24px 28px; font: 19px/1.62 var(--mono); white-space: pre; position: relative; }
+  .code::after { content: "python"; position: absolute; top: 12px; right: 16px; font-size: 12px; letter-spacing: 2px; color: #7f8fb3; text-transform: uppercase; }
+  .k { color: #f5b821; } .s { color: #a7d7a0; } .c { color: #7f8fb3; font-style: italic; } .f { color: #8ecae6; } .n { color: #ffd27a; }
+
+  /* 01 title */
+  .title h1 { font: 500 236px/0.86 var(--serif); letter-spacing: -8px; margin: 0 0 34px -10px; }
+  .title h1 span { color: var(--ember); font-style: italic; }
+  .title .sub { font: 400 34px/1.35 var(--serif); color: #c9d4ea; max-width: 720px; }
+  .title .who { position: absolute; left: 0; bottom: 0; display: flex; gap: 56px; font: 500 18px var(--mono); color: #a9b7d6; }
+  .title .who b { display: block; color: var(--paper); font: 600 22px var(--sans); margin-bottom: 6px; letter-spacing: 0; }
+  .title svg { position: absolute; right: -20px; top: 20px; width: 640px; height: 560px; }
+  .title svg path { stroke-dasharray: 900; stroke-dashoffset: 900; }
+  .slide.active.title svg path { animation: draw 1.6s ease forwards; animation-delay: calc(var(--d) * 120ms + .2s); }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+
+  /* 02 before */
+  .tools { display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px; margin-top: 70px; }
+  .tool { height: 150px; padding: 20px 26px; display: flex; align-items: center; font: 600 28px var(--mono); background: #fff; }
+  .tool:nth-child(1) { border: 2px solid var(--ink); }
+  .tool:nth-child(2) { border: 2px dashed #8a97b0; transform: rotate(-1.2deg); }
+  .tool:nth-child(3) { border: 1px solid var(--rule); border-radius: 18px; font-family: var(--serif); font-style: italic; }
+  .tool:nth-child(4) { border: 4px double #8a97b0; transform: rotate(.8deg); }
+  .tool:nth-child(5) { border: 2px dotted var(--ink); font-family: var(--sans); }
+  .tool:nth-child(6) { border-left: 8px solid var(--ember); transform: rotate(-.6deg); }
+  .tool:nth-child(7) { border: 1px solid var(--ink); border-radius: 2px 28px 2px 28px; }
+  .tool.more { background: transparent; border: 2px dashed var(--rule); color: var(--muted); font: 400 22px/1.4 var(--sans); }
+  .three { display: flex; gap: 56px; margin-top: 70px; font: 500 34px var(--serif); }
+  .three span::before { content: "≠ "; color: var(--fire); }
+
+  /* 03 after */
+  .pipe { display: grid; grid-template-columns: 1fr 70px 1fr 70px 1fr; align-items: stretch; margin-top: 54px; }
+  .stage-box { padding: 30px 32px; background: #fff; border: 2px solid var(--ink); min-height: 250px; }
+  .stage-box h3 { font: 600 32px var(--sans); margin: 12px 0 14px; }
+  .stage-box p { font-size: 21px; line-height: 1.45; color: var(--ink-2); }
+  .stage-box .tag { font: 600 14px var(--mono); letter-spacing: 2px; text-transform: uppercase; }
+  .stage-box.f4 { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .stage-box.f4 .tag { color: var(--ember); }
+  .stage-box.f4 p { color: #c9d4ea; }
+  .stage-box.solver { background: transparent; border-style: dashed; border-color: #8a97b0; }
+  .stage-box.solver .tag { color: var(--muted); }
+  .arrow { display: grid; place-items: center; font-size: 40px; color: var(--fire); }
+  .after-foot { display: flex; align-items: center; gap: 36px; margin-top: 44px; font-size: 22px; color: var(--ink-2); }
+  .after-foot span + span::before { content: "·"; margin-right: 36px; color: var(--fire); }
+
+  /* 04 gains */
+  .gains { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 38px; margin-top: 54px; }
+  .gain { border-top: 5px solid var(--ember); padding-top: 22px; }
+  .gain .num { font: 500 84px/1 var(--serif); color: var(--fire); }
+  .gain h3 { font: 600 30px var(--sans); margin: 16px 0 12px; }
+  .gain p { font-size: 21px; line-height: 1.5; color: var(--ink-2); }
+  .objects { margin-top: 50px; padding: 22px 28px; background: #fff; border: 1px solid var(--rule); display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .objects > span:first-child { font: 600 14px var(--mono); letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-right: 10px; }
+  .obj { padding: 7px 14px; border: 1.5px solid var(--ink); font: 500 19px var(--mono); }
+
+  /* 05 formats */
+  .formats { display: grid; grid-template-columns: 1.55fr 1fr 1fr; gap: 40px; margin-top: 46px; }
+  .fgroup h3 { display: flex; justify-content: space-between; align-items: baseline; font: 600 28px var(--sans); padding-bottom: 12px; border-bottom: 3px solid var(--ink); }
+  .fgroup h3 small { font: 500 14px var(--mono); color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; }
+  .frow { display: grid; grid-template-columns: 150px 1fr; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--rule); align-items: baseline; }
+  .frow b { font: 600 21px var(--mono); color: var(--fire); }
+  .frow span { font-size: 19px; color: var(--ink-2); }
+  .fcols { display: grid; grid-template-columns: 1fr 1fr; column-gap: 28px; }
+
+  /* 06 questions */
+  .qa { display: grid; grid-template-columns: 1fr 1.35fr; gap: 56px; margin-top: 48px; }
+  .q { font: italic 500 40px/1.15 var(--serif); position: relative; padding-left: 44px; }
+  .q::before { content: "“"; position: absolute; left: 0; top: -14px; font-size: 90px; color: var(--ember); line-height: 1; }
+  .a { margin-top: 22px; padding-left: 44px; font-size: 23px; line-height: 1.5; color: var(--ink-2); }
+  .a b { color: var(--ink); }
+  .benefits { margin-top: 24px; padding-left: 44px; display: grid; gap: 0; }
+  .benefit { display: grid; grid-template-columns: 210px 1fr; gap: 18px; padding: 14px 0; border-bottom: 1px solid var(--rule); font-size: 21px; line-height: 1.4; }
+  .benefit:first-child { border-top: 1px solid var(--rule); }
+  .benefit b { font: 600 21px var(--mono); color: var(--fire); }
+
+  /* 07 under the hood */
+  .stack { margin-top: 56px; display: grid; gap: 22px; }
+  .layer { display: grid; grid-template-columns: 300px 90px 300px 90px 1fr; align-items: center; padding: 36px 34px; background: #fff; border: 1px solid var(--rule); }
+  .layer .from { font: 500 22px var(--mono); color: var(--muted); }
+  .layer .lib { font: 600 36px var(--serif); }
+  .layer .lib small { display: block; font: 500 14px var(--mono); color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 4px; }
+  .layer .to { font: 600 22px var(--mono); color: var(--fire); }
+  .layer .arrow { font-size: 30px; }
+  .layer .why { font-size: 24px; color: var(--ink-2); line-height: 1.4; }
+
+  /* 08 migjorn */
+  .mig { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; margin-top: 44px; }
+  .story p { font-size: 22px; line-height: 1.55; color: var(--ink-2); }
+  .story p + p { margin-top: 18px; }
+  .story b { color: var(--ink); }
+  .props { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .prop { background: #fff; border: 1px solid var(--rule); padding: 22px 24px; }
+  .prop .big { font: 500 46px/1 var(--serif); color: var(--fire); }
+  .prop p { margin-top: 10px; font-size: 19px; line-height: 1.4; color: var(--ink-2); }
+  .race { margin-top: 30px; }
+  .race .label { font: 600 14px var(--mono); letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .lane { display: grid; grid-template-columns: 150px 1fr; align-items: center; gap: 16px; margin-bottom: 10px; font: 500 19px var(--mono); }
+  .lane .track { height: 34px; background: var(--paper-2); position: relative; }
+  .lane .bar { position: absolute; inset: 0 auto 0 0; width: 0; display: flex; align-items: center; padding-left: 12px; font: 500 16px var(--mono); white-space: nowrap; }
+  .lane .bar.old { background: #aab6cc; color: var(--ink); }
+  .lane .bar.new { background: var(--ember); }
+  .lane .bar.new span { position: absolute; left: calc(100% + 12px); color: var(--fire); font-weight: 600; }
+  .slide.active .bar.old { animation: grow-old 2.4s .4s ease-out forwards; }
+  .slide.active .bar.new { animation: grow-new .35s .4s ease-out forwards; }
+  @keyframes grow-old { to { width: 100%; } }
+  @keyframes grow-new { to { width: 11%; } }
+
+  /* 09 pandas, 10 pyvista */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-top: 44px; align-items: start; }
+  .points { display: grid; gap: 16px; margin-top: 30px; }
+  .points li { list-style: none; display: grid; grid-template-columns: 30px 1fr; font-size: 22px; line-height: 1.45; color: var(--ink-2); }
+  .points li::before { content: "→"; color: var(--fire); font-weight: 700; }
+  .points { padding: 0; }
+  .df { width: 100%; border-collapse: collapse; background: #fff; font: 17px var(--mono); margin-top: 22px; }
+  .df caption { caption-side: top; text-align: left; font: 600 14px var(--mono); letter-spacing: 2px; text-transform: uppercase; color: var(--muted); padding-bottom: 10px; }
+  .df th { text-align: right; padding: 10px 16px; border-bottom: 2px solid var(--ink); font-weight: 600; }
+  .df td { text-align: right; padding: 9px 16px; border-bottom: 1px solid var(--rule); }
+  .df th:first-child, .df td:first-child { text-align: left; color: var(--muted); }
+  .df tr.hl td { background: var(--fire-soft); }
+  .exports { display: flex; gap: 12px; margin-top: 18px; }
+  .exports span { padding: 6px 12px; border: 1.5px solid var(--ink); font: 500 17px var(--mono); }
+  .heat { position: relative; margin-top: 22px; background: #fff; border: 1px solid var(--rule); padding: 18px; }
+  .heat-grid { display: grid; grid-template-columns: repeat(40, 1fr); aspect-ratio: 40 / 22; }
+  .heat-grid i { display: block; }
+  .heat .cap { display: flex; justify-content: space-between; margin-top: 12px; font: 500 14px var(--mono); color: var(--muted); }
+  .heat .scale { width: 220px; height: 10px; background: linear-gradient(90deg, #132a5c, #1f5fbf, #78aadc, #f5b821, #fff0be); align-self: center; }
+
+  /* 11 docs */
+  .docs { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 34px; margin-top: 46px; }
+  .doc h3 { font: 600 26px var(--sans); padding-bottom: 12px; border-bottom: 3px solid var(--ink); margin-bottom: 12px; }
+  .doc h3 small { display: block; font: 500 13px var(--mono); letter-spacing: 2px; text-transform: uppercase; color: var(--fire); margin-bottom: 6px; }
+  .doc li { list-style: none; font-size: 19px; line-height: 1.3; padding: 7px 0; border-bottom: 1px solid var(--rule); color: var(--ink-2); }
+  .doc ul { padding: 0; }
+  .doc code { font-size: 17px; color: var(--fire); }
+  .doclink { display: inline-flex; align-items: center; gap: 12px; margin-top: 26px; font: 500 22px var(--mono); color: var(--ink); text-decoration: none; border-bottom: 4px solid var(--ember); padding-bottom: 2px; }
+  .doclink:hover { background: var(--fire-soft); }
+
+  /* 12 hands on */
+  .hands { display: grid; grid-template-columns: 1.25fr 1fr; gap: 64px; margin-top: 40px; }
+  .steps { padding: 0; display: grid; gap: 14px; counter-reset: s; }
+  .steps li { list-style: none; counter-increment: s; display: grid; grid-template-columns: 48px 1fr; gap: 16px; align-items: start; }
+  .steps li::before { content: counter(s, decimal-leading-zero); font: 600 18px var(--mono); color: var(--fire); padding-top: 4px; }
+  .steps p { font-size: 20px; margin-bottom: 8px; color: var(--ink-2); }
+  .cmd { display: flex; align-items: center; gap: 12px; background: var(--ink); color: var(--paper); padding: 8px 8px 8px 18px; font: 18px var(--mono); border-radius: 4px; }
+  .cmd::before { content: "$"; color: var(--ember); }
+  .cmd code { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .copy { flex: none; border: 1px solid #2f4a85; background: #1c3772; color: #dbe3f3; font: 600 13px var(--mono); letter-spacing: 1px; text-transform: uppercase; padding: 7px 12px; border-radius: 3px; cursor: pointer; }
+  .copy:hover { background: var(--ember); border-color: var(--ember); color: var(--ink); }
+  .copy.ok { background: var(--sea); border-color: var(--sea); color: #fff; }
+  .agenda h3 { font: 600 14px var(--mono); letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .nb { display: grid; grid-template-columns: 52px 1fr 76px; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--rule); align-items: baseline; font-size: 20px; }
+  .nb:first-of-type { border-top: 3px solid var(--ink); }
+  .nb b { font: 600 18px var(--mono); color: var(--fire); }
+  .nb span:last-child { font: 500 16px var(--mono); color: var(--muted); text-align: right; }
+  .nb small { display: block; font-size: 16px; color: var(--muted); margin-top: 3px; }
+  .offline { margin-top: 18px; font-size: 18px; line-height: 1.45; color: var(--ink-2); padding: 14px 18px; background: var(--fire-soft); }
+
+  /* 13 close */
+  .close h2 { font-size: 120px; letter-spacing: -4px; max-width: none; }
+  .close .lede { color: #c9d4ea; margin-top: 30px; font-family: var(--serif); font-size: 32px; }
+  .links { position: absolute; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+  .links a { display: block; padding: 24px 26px; border: 1px solid #2f4a85; text-decoration: none; transition: border-color .2s, background .2s; }
+  .links a:hover { border-color: var(--ember); background: #1b3a7a; }
+  .links small { display: block; font: 600 13px var(--mono); letter-spacing: 2px; text-transform: uppercase; color: var(--ember); margin-bottom: 10px; }
+  .links span { font: 500 19px var(--mono); color: var(--paper); }
+
+  /* chrome */
+  .controls { position: fixed; right: 16px; bottom: 14px; display: flex; align-items: center; gap: 6px; z-index: 10; transition: opacity .4s; }
+  .controls button { width: 38px; height: 38px; border: 1px solid #2f4a85; background: rgb(19 42 92 / 85%); color: #f4f6f9; border-radius: 4px; font-size: 18px; cursor: pointer; }
+  .controls button:hover:not(:disabled) { background: var(--ember); border-color: var(--ember); color: var(--ink); }
+  .controls button:disabled { opacity: .3; cursor: default; }
+  .progress { position: fixed; left: 0; bottom: 0; height: 3px; background: var(--ember); transition: width .35s ease; z-index: 11; }
+  body.idle .controls { opacity: 0; }
+
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; transition: none !important; } }
+  @media print {
+    @page { size: 1600px 900px; margin: 0; }
+    html, body { overflow: visible; background: #fff; }
+    .viewport { position: static; display: block; }
+    .stage { transform: none !important; height: auto; overflow: visible; }
+    .slide { position: relative; width: 1600px; height: 900px; opacity: 1; visibility: visible; break-after: page; overflow: hidden; }
+    .rise, .title svg path { animation: none !important; opacity: 1 !important; stroke-dashoffset: 0 !important; }
+    .bar.old { width: 100% !important; } .bar.new { width: 11% !important; }
+    .controls, .progress, .copy { display: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="viewport"><div class="stage" id="stage">
+
+  <!-- 01 -->
+  <section class="slide dark title active" data-title="F4Enix — an introduction">
+    <div class="meta"><span>F4E · Engineering analyses unit</span><span>Workshop · 19 Nov 2026</span></div>
+    <div class="content">
+      <svg viewBox="0 0 640 560" aria-hidden="true" fill="none" stroke-linecap="round">
+        <g stroke="#3c5690" stroke-width="2">
+          <path style="--d:0" d="M20 60 C240 60 300 280 430 280"/>
+          <path style="--d:1" d="M20 130 C240 130 300 280 430 280"/>
+          <path style="--d:2" d="M20 200 C240 200 300 280 430 280"/>
+          <path style="--d:3" d="M20 280 C240 280 300 280 430 280"/>
+          <path style="--d:4" d="M20 360 C240 360 300 280 430 280"/>
+          <path style="--d:5" d="M20 430 C240 430 300 280 430 280"/>
+          <path style="--d:6" d="M20 500 C240 500 300 280 430 280"/>
+        </g>
+        <path style="--d:8" d="M430 280 H630" stroke="#f5b821" stroke-width="9"/>
+        <circle cx="430" cy="280" r="9" fill="#f5b821" stroke="none"/>
+      </svg>
+      <div style="padding-top:70px">
+        <h1 class="rise">F<span>4</span>Enix</h1>
+        <p class="sub rise" style="--d:1">One Python toolkit for the whole neutronics workflow, from the first input deck to the last plot.</p>
+      </div>
+      <div class="who rise" style="--d:2">
+        <div><b>Davide Laghi</b>F4E Engineering Analyses Unit</div>
+        <div><b>An introduction</b>19 November 2026</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 -->
+  <section class="slide" data-title="Before F4Enix">
+    <div class="meta"><span>F4Enix — an introduction</span><span><b>01</b> · The starting point</span></div>
+    <div class="content">
+      <p class="kicker rise">Before F4Enix</p>
+      <h2 class="rise" style="--d:1">Seven tools. <em>Seven ways</em> of doing things.</h2>
+      <div class="tools">
+        <div class="tool rise" style="--d:2">mctools</div>
+        <div class="tool rise" style="--d:3">iMCNP_Source</div>
+        <div class="tool rise" style="--d:4">rssa_analyzer</div>
+        <div class="tool rise" style="--d:5">iWW_GVR</div>
+        <div class="tool rise" style="--d:6">mesh2vtk</div>
+        <div class="tool rise" style="--d:7">vtkconverter</div>
+        <div class="tool rise" style="--d:8">atlas</div>
+        <div class="tool more rise" style="--d:9">…each with its own install, conventions and maintainer.</div>
+      </div>
+      <div class="three rise" style="--d:10"><span>quality</span><span>maturity</span><span>maintenance strategy</span></div>
+    </div>
+    <div class="foot"><span>Davide Laghi · F4E</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 03 -->
+  <section class="slide" data-title="What F4Enix is">
+    <div class="meta"><span>F4Enix — an introduction</span><span><b>02</b> · What it is</span></div>
+    <div class="content">
+      <p class="kicker rise">What F4Enix is</p>
+      <h2 class="rise" style="--d:1">A toolkit that stays with you <em>through the whole analysis</em>.</h2>
+      <div class="pipe">
+        <div class="stage-box f4 rise" style="--d:2"><span class="tag">F4Enix</span><h3>Prepare</h3><p>Read, edit, extract and merge MCNP models; materials, tallies and run settings.</p></div>
+        <div class="arrow rise" style="--d:3">→</div>
+        <div class="stage-box solver rise" style="--d:4"><span class="tag">Your solver</span><h3>Run</h3><p>MCNP · D1SUNED · FISPACT-II.<br>F4Enix doesn't replace them; it surrounds them.</p></div>
+        <div class="arrow rise" style="--d:5">→</div>
+        <div class="stage-box f4 rise" style="--d:6"><span class="tag">F4Enix</span><h3>Analyse</h3><p>Outputs, tallies, meshes, weight windows, activation, dose and pathways.</p></div>
+      </div>
+      <div class="after-foot rise" style="--d:7">
+        <span class="pill">pip install f4enix</span>
+        <span>Python 3</span><span>MCNP-first, not MCNP-only</span><span>Modern development standards</span>
+      </div>
+    </div>
+    <div class="foot"><span>Davide Laghi · F4E</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 04 -->
+  <section class="slide" data-title="Why one toolkit">
+    <div class="meta"><span>F4Enix — an introduction</span><span><b>03</b> · Why one toolkit</span></div>
+    <div class="content">
+      <p class="kicker rise">Why bring them together</p>
+      <h2 class="rise" style="--d:1">One package is more than <em>the sum of seven</em>.</h2>
+      <div class="gains">
+        <div class="gain rise" style="--d:2"><div class="num">1</div><h3>One place</h3><p>One <code>pip install</code>, one repository, one place to fix bugs and add features.</p></div>
+        <div class="gain rise" style="--d:3"><div class="num">2</div><h3>Shared objects</h3><p>Materials, nuclides and irradiation scenarios appear in every phase. Define them once, reuse them everywhere.</p></div>
+        <div class="gain rise" style="--d:4"><div class="num">3</div><h3>Modules that connect</h3><p>Results from one module feed the next without format juggling between scripts.</p></div>
+      </div>
+      <div class="objects rise" style="--d:5">
+        <span>Shared across modules</span>
+        <span class="obj">Material</span><span class="obj">Nuclide</span><span class="obj">IrradiationScenario</span><span class="obj">Pulse</span><span class="obj">Spectra</span><span class="obj">Pathway</span><span class="obj">LibManager</span><span class="obj">Constants</span>
+      </div>
+    </div>
+    <div class="foot"><span>Davide Laghi · F4E</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 05 -->
+  <section class="slide" data-title="What it reads">
+    <div class="meta"><span>F4Enix — an introduction</span><span><b>04</b> · Capabilities</span></div>
+    <div class="content">
+      <p class="kicker rise">What it reads and writes</p>
+      <h2 class="rise" style="--d:1">If your analysis produces it, F4Enix can <em>probably parse it</em>.</h2>
+      <div class="formats">
+        <div class="fgroup rise" style="--d:2"><h3>MCNP <small>8 formats</small></h3>
+          <div class="fcols">
+            <div>
+              <div class="frow"><b>INPUT</b><span>input deck</span></div>
+              <div class="frow"><b>OUTP</b><span>output listing</span></div>
+              <div class="frow"><b>MCTAL</b><span>tally results</span></div>
+              <div class="frow"><b>MESHTAL</b><span>mesh tallies</span></div>
+            </div>
+            <div>
+              <div class="frow"><b>WWINP</b><span>weight windows</span></div>
+              <div class="frow"><b>RSSA</b><span>surface source</span></div>
+              <div class="frow"><b>EEOUT</b><span>unstructured mesh</span></div>
+              <div class="frow"><b>ACE</b><span>nuclear data</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="fgroup rise" style="--d:3"><h3>D1S-UNED <small>shutdown dose</small></h3>
+          <div class="frow"><b>IRRAD</b><span>irradiation file</span></div>
+          <div class="frow"><b>REAC</b><span>reactions file</span></div>
+          <div class="frow"><b>CDGS</b><span>decay gamma source</span></div>
+        </div>
+        <div class="fgroup rise" style="--d:4"><h3>FISPACT-II <small>activation</small></h3>
+          <div class="frow"><b>Input</b><span>build inventories</span></div>
+          <div class="frow"><b>Output</b><span>dose, heat, pathways</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span>Davide Laghi · F4E</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 06 -->
+  <section class="slide" data-title="Fair questions">
+    <div class="meta"><span>F4Enix — an introduction</span><span><b>05</b> · Fair questions</span></div>
+    <div class="content">
+      <p class="kicker rise">Fair questions</p>
+      <div class="qa">
+        <div class="rise" style="--d:1">
+          <p class="q">I already use PyNE.</p>
+          <p class="a">Similar idea, but F4Enix offers <b>more capabilities</b> and is <b>easier to install and use</b>.</p>
+        </div>
+        <div class="rise" style="--d:2">
+          <p class="q">We already have our own in-house tools.</p>
+          <p class="a">Then here is what you would gain:</p>
+          <div class="benefits">
+            <div class="benefit"><b>capabilities</b><span>Most likely more than you have today.</span></div>
+            <div class="benefit"><b>traceability</b><span>Versioned, tested, maintained with modern practices.</span></div>
+            <div class="benefit"><b>robustness</b><span>Open source: every user who reports an issue makes it stronger.</span></div>
+            <div class="benefit"><b>documentation</b><span>Tutorials and worked examples for each feature.</span></div>
+            <div class="benefit"><b>collaboration</b><span>Pooled effort beats parallel reinventions.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span>Davide Laghi · F4E</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 07 -->
+  <section class="slide" data-title="Under the hood">
+    <div class="meta"><span>F4Enix — an introduction</span><span><b>06</b> · Under the hood</span></div>
+    <div class="content">
+      <p class="kicker rise">Under the hood</p>
+      <h2 class="rise" style="--d:1">Three libraries shape <em>what you get back</em>.</h2>
+      <div class="stack">
+        <div class="layer rise" style="--d:2"><span class="from">MCNP input decks</span><span class="arrow">→</span><span class="lib">migjorn<small>parser engine</small></span><span class="arrow">→</span><span class="why">An editable, lossless <code class="to">Input</code> object</span></div>
+        <div class="layer rise" style="--d:3"><span class="from">tallies, tables, summaries</span><span class="arrow">→</span><span class="lib">pandas<small>tabular data</small></span><span class="arrow">→</span><span class="why">A <code class="to">DataFrame</code>, ready to filter, combine and export</span></div>
+        <div class="layer rise" style="--d:4"><span class="from">FMESH results</span><span class="arrow">→</span><span class="lib">PyVista<small>3D meshes · VTK</small></span><span class="arrow">→</span><span class="why">A <code class="to">grid</code> to slice, plot or send to ParaView</span></div>
+      </div>
+    </div>
+    <div class="foot"><span>Davide Laghi · F4E</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 08 -->
+  <section class="slide" data-title="migjorn">
+    <div class="meta"><span>F4Enix — an introduction</span><span><b>06a</b> · migjorn</span></div>
+    <div class="content">
+      <p class="kicker rise">New in F4Enix v1.0.0+</p>
+      <h2 class="rise" style="--d:1">A parser built to <em>edit</em>, not just read.</h2>
+      <div class="mig">
+        <div class="story rise" style="--d:2">
+          <p>Earlier versions parsed MCNP inputs with <b>numjuggler</b>, a reliable work-horse well known in the community.</p>
+          <p>But numjuggler was designed to <b>parse</b>, not to <b>manipulate</b>, which made editing in F4Enix cumbersome. Its maintenance has also dropped almost to zero.</p>
+          <p>So we wrote <b>migjorn</b>, an in-house parser for one of the toolkit's most important jobs.</p>
+          <div class="race">
+            <p class="label">Parsing the E-Lite model</p>
+            <div class="lane"><span>numjuggler</span><div class="track"><div class="bar old">minutes</div></div></div>
+            <div class="lane"><span>migjorn</span><div class="track"><div class="bar new"><span>seconds</span></div></div></div>
+          </div>
+        </div>
+        <div class="props rise" style="--d:3">
+          <div class="prop"><div class="big">Rust</div><p>Native core with Python bindings.</p></div>
+          <div class="prop"><div class="big">~10×</div><p>One order of magnitude faster parsing.</p></div>
+          <div class="prop"><div class="big">1:1</div><p>Lossless: the file round-trips byte for byte.</p></div>
+          <div class="prop"><div class="big">F4E</div><p>Developed in-house: full control over features and maintenance.</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span>Davide Laghi · F4E</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 09 -->
+  <section class="slide" data-title="pandas">
+    <div class="meta"><span>F4Enix — an introduction</span><span><b>06b</b> · pandas</span></div>
+    <div class="content">
+      <p class="kicker rise">pandas</p>
+      <h2 class="rise" style="--d:1">Every table is a <em>DataFrame</em>.</h2>
+      <div class="split">
+        <div class="rise" style="--d:2">
+          <ul class="points">
+            <li><span>Tally results, summaries and statistical checks always come back as pandas DataFrames.</span></li>
+            <li><span>Filter, group, merge and plot with tools you may already know.</span></li>
+            <li><span>The natural building block of a post-processing pipeline.</span></li>
+          </ul>
+          <table class="df" aria-label="Schematic DataFrame">
+            <caption>schematic · one row per bin</caption>
+            <thead><tr><th></th><th>Cells</th><th>Energy</th><th>Value</th><th>Error</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>…</td><td>…</td><td>…</td><td>…</td></tr>
+              <tr class="hl"><td>1</td><td>…</td><td>…</td><td>…</td><td>…</td></tr>
+              <tr><td>2</td><td>…</td><td>…</td><td>…</td><td>…</td></tr>
+            </tbody>
+          </table>
+          <div class="exports"><span>.to_csv()</span><span>.to_excel()</span></div>
+        </div>
+        <div class="rise" style="--d:3">
+<div class="code"><span class="k">from</span> f4enix.output.mctal <span class="k">import</span> Mctal
+
+mctal = <span class="f">Mctal</span>(<span class="s">"mctal"</span>)
+
+<span class="c"># one DataFrame per tally</span>
+flux = mctal.tallydata[<span class="n">4</span>]
+
+<span class="c"># min/max errors, also a DataFrame</span>
+errors = mctal.<span class="f">get_error_summary</span>()
+
+flux.<span class="f">to_excel</span>(<span class="s">"F4_flux.xlsx"</span>)</div>
+          <a class="doclink" href="https://pandas.pydata.org/docs/" target="_blank" rel="noreferrer">pandas.pydata.org/docs ↗</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span>Davide Laghi · F4E</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 10 -->
+  <section class="slide" data-title="PyVista">
+    <div class="meta"><span>F4Enix — an introduction</span><span><b>06c</b> · PyVista</span></div>
+    <div class="content">
+      <p class="kicker rise">PyVista</p>
+      <h2 class="rise" style="--d:1">Every mesh is a <em>PyVista grid</em>.</h2>
+      <div class="split">
+        <div class="rise" style="--d:2">
+<div class="code"><span class="k">from</span> f4enix.output.meshtal.meshtal <span class="k">import</span> Meshtal
+
+meshtal = <span class="f">Meshtal</span>(<span class="s">"meshtal"</span>)
+meshtal.<span class="f">readMesh</span>()
+fmesh = meshtal.mesh[<span class="n">1004</span>]
+
+<span class="c"># a PyVista grid: arrays, filters, plots</span>
+values = fmesh.grid[<span class="s">"Value - Total"</span>]
+
+<span class="c"># ready for ParaView</span>
+fmesh.<span class="f">write</span>(<span class="s">"out"</span>, out_format=<span class="s">"vtk"</span>)</div>
+          <a class="doclink" href="https://docs.pyvista.org/version/stable/index.html" target="_blank" rel="noreferrer">docs.pyvista.org ↗</a>
+        </div>
+        <div class="rise" style="--d:3">
+          <ul class="points" style="margin-top:0">
+            <li><span>A Pythonic layer over VTK: mesh structures, filters and 3D plotting.</span></li>
+            <li><span>Think of it as a <b>scriptable ParaView</b>: automate the clip-filter-combine steps you repeat every time.</span></li>
+          </ul>
+          <div class="heat" aria-label="Illustrative mesh tally slice">
+            <div class="heat-grid" id="heat"></div>
+            <div class="cap"><span>illustrative slice</span><span class="scale"></span><span>value</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span>Davide Laghi · F4E</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 11 -->
+  <section class="slide" data-title="Documentation">
+    <div class="meta"><span>F4Enix — an introduction</span><span><b>07</b> · Where to learn more</span></div>
+    <div class="content">
+      <p class="kicker rise">Documentation</p>
+      <h2 class="rise" style="--d:1">Every feature has <em>a worked example</em>.</h2>
+      <div class="docs">
+        <div class="doc rise" style="--d:2"><h3><small>Tutorials</small>End-to-end workflows</h3>
+          <ul><li>Get started with MCNP</li><li>Setting up a D1SUNED study</li></ul></div>
+        <div class="doc rise" style="--d:3"><h3><small>Examples</small>Pre-processing</h3>
+          <ul><li>MCNP input files</li><li>Irradiation scenarios</li><li>D1S-UNED files</li><li>E-Lite model</li><li>Weight windows &amp; GVRs</li><li>ACE files &amp; XS</li><li>FISPACT input</li></ul></div>
+        <div class="doc rise" style="--d:4"><h3><small>Examples</small>Post-processing</h3>
+          <ul><li>MCNP output · MCTAL · MESHTAL</li><li>MESHINFO · RSSA</li><li>EEOUT (unstructured meshes)</li><li>FISPACT-II legacy output</li><li>Decay pathway library</li><li>CDGS production</li></ul></div>
+        <div class="doc rise" style="--d:5"><h3><small>API reference</small>Every class, documented</h3>
+          <ul><li><code>Input.cells</code> · <code>.surfs</code></li><li><code>Input.transformations</code></li><li><code>Input.other_data</code></li><li><code>Input.tally_keys</code> · <code>.fmesh_keys</code></li><li>…and the rest of the API</li></ul></div>
+      </div>
+      <a class="doclink rise" style="--d:6" href="https://f4enix.readthedocs.io/en/latest/" target="_blank" rel="noreferrer">f4enix.readthedocs.io ↗</a>
+    </div>
+    <div class="foot"><span>Davide Laghi · F4E</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 12 -->
+  <section class="slide" data-title="Hands on">
+    <div class="meta"><span>F4Enix — an introduction</span><span><b>08</b> · Hands on</span></div>
+    <div class="content">
+      <p class="kicker rise">Hands on</p>
+      <h2 class="rise" style="--d:1">Five commands, then <em>let's go</em>.</h2>
+      <div class="hands">
+        <ol class="steps rise" style="--d:2">
+          <li><div><p>Open a Miniforge, Anaconda or command prompt with Python and Git available. Then clone the training:</p><div class="cmd"><code>git clone https://github.com/Fusion4Energy/f4enix_training</code><button class="copy" type="button">Copy</button></div></div></li>
+          <li><div><p>Create an environment</p><div class="cmd"><code>conda create -n f4enix_workshop python=3.12</code><button class="copy" type="button">Copy</button></div></div></li>
+          <li><div><p>Activate it</p><div class="cmd"><code>conda activate f4enix_workshop</code><button class="copy" type="button">Copy</button></div></div></li>
+          <li><div><p>Install F4Enix and the Jupyter kernel</p><div class="cmd"><code>pip install f4enix ipykernel</code><button class="copy" type="button">Copy</button></div></div></li>
+          <li><div><p>Check everything works; you should see <b>ALL CHECKS PASSED</b></p><div class="cmd"><code>python check_setup.py</code><button class="copy" type="button">Copy</button></div></div></li>
+        </ol>
+        <div class="agenda rise" style="--d:3">
+          <h3>Today · ~2.5 h · one model (ITER_1D) end to end</h3>
+          <div class="nb"><b>00</b><span>Setup &amp; Python refresher</span><span>5′</span></div>
+          <div class="nb"><b>01</b><span>Reading &amp; editing an MCNP input</span><span>30′</span></div>
+          <div class="nb"><b>02</b><span>Materials, tallies, run settings</span><span>30′</span></div>
+          <div class="nb"><b>03</b><span>Parsing OUTP and MCTAL</span><span>30′</span></div>
+          <div class="nb"><b>04</b><span>Mesh tallies, plots, weight windows</span><span>30′</span></div>
+          <div class="nb"><b>05</b><span>FISPACT activation studies</span><span>20′</span></div>
+          <p class="offline">Everything runs offline: no MCNP run and no <code>xsdir</code> needed. Outputs are already in <code>data/</code>.</p>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span>Davide Laghi · F4E</span><span class="pg"></span></div>
+  </section>
+
+  <!-- 13 -->
+  <section class="slide dark close" data-title="Thank you">
+    <div class="meta"><span>F4Enix — an introduction</span><span>Thank you</span></div>
+    <div class="content">
+      <div style="padding-top:60px">
+        <h2 class="rise" style="--d:1">Thank you.<br><em>Questions?</em></h2>
+        <p class="lede rise" style="--d:2">Then open notebook 00 and let's get to work.</p>
+      </div>
+      <div class="links rise" style="--d:3">
+        <a href="https://f4enix.readthedocs.io/en/latest/" target="_blank" rel="noreferrer"><small>Docs</small><span>f4enix.readthedocs.io</span></a>
+        <a href="https://github.com/Fusion4Energy/F4Enix" target="_blank" rel="noreferrer"><small>Code</small><span>github.com/Fusion4Energy/F4Enix</span></a>
+        <a href="https://github.com/Fusion4Energy/f4enix_training" target="_blank" rel="noreferrer"><small>Training</small><span>…/Fusion4Energy/f4enix_training</span></a>
+      </div>
+    </div>
+  </section>
+
+</div></div>
+
+<nav class="controls" aria-label="Slide navigation">
+  <button id="prev" type="button" aria-label="Previous slide">←</button>
+  <button id="next" type="button" aria-label="Next slide">→</button>
+  <button id="fs" type="button" aria-label="Toggle fullscreen" title="Fullscreen (F)">⛶</button>
+</nav>
+<div class="progress" id="progress"></div>
+
+<script>
+(() => {
+  const stage = document.getElementById('stage');
+  const slides = [...stage.querySelectorAll('.slide')];
+  const prev = document.getElementById('prev');
+  const next = document.getElementById('next');
+  const progress = document.getElementById('progress');
+  const total = String(slides.length).padStart(2, '0');
+  let index = 0;
+
+  slides.forEach((s, i) => { const pg = s.querySelector('.pg'); if (pg) pg.textContent = `${String(i + 1).padStart(2, '0')} / ${total}`; });
+
+  const fit = () => { stage.style.transform = `scale(${Math.min(innerWidth / 1600, innerHeight / 900)})`; };
+
+  function go(i) {
+    index = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, j) => { s.classList.toggle('active', j === index); s.setAttribute('aria-hidden', String(j !== index)); });
+    prev.disabled = index === 0;
+    next.disabled = index === slides.length - 1;
+    progress.style.width = `${(index + 1) / slides.length * 100}%`;
+    document.title = slides[index].dataset.title;
+    history.replaceState(null, '', `#${index + 1}`);
+  }
+
+  const toggleFs = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  prev.onclick = () => go(index - 1);
+  next.onclick = () => go(index + 1);
+  document.getElementById('fs').onclick = toggleFs;
+
+  addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); go(index + 1); }
+    else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); go(index - 1); }
+    else if (e.key === 'Home') go(0);
+    else if (e.key === 'End') go(slides.length - 1);
+    else if (e.key.toLowerCase() === 'f') toggleFs();
+  });
+
+  let x0 = null;
+  addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+  addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 50) go(index + (dx < 0 ? 1 : -1));
+    x0 = null;
+  });
+
+  let idle;
+  const wake = () => { document.body.classList.remove('idle'); clearTimeout(idle); idle = setTimeout(() => document.body.classList.add('idle'), 2500); };
+  addEventListener('mousemove', wake);
+  wake();
+
+  document.querySelectorAll('.copy').forEach(btn => btn.addEventListener('click', async () => {
+    const text = btn.parentElement.querySelector('code').textContent;
+    try { await navigator.clipboard.writeText(text); }
+    catch {
+      const ta = Object.assign(document.createElement('textarea'), { value: text });
+      document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove();
+    }
+    btn.textContent = 'Copied'; btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('ok'); }, 1400);
+  }));
+
+  // Illustrative field only: a point source attenuating through a slab with a gap
+  const stops = [[19,42,92],[31,95,191],[120,170,220],[245,184,33],[255,240,190]];
+  const colour = t => {
+    const v = Math.min(.999, Math.max(0, t)) * (stops.length - 1), i = Math.floor(v), f = v - i;
+    return `rgb(${stops[i].map((c, k) => Math.round(c + (stops[i + 1][k] - c) * f)).join(',')})`;
+  };
+  const cells = [];
+  for (let r = 0; r < 22; r++) for (let c = 0; c < 40; c++) {
+    const d = Math.hypot((c - 8) / 9, (r - 11) / 7);
+    const shield = c > 22 && c < 27 && Math.abs(r - 11) > 2 ? .35 : 1;
+    cells.push(`<i style="background:${colour(Math.exp(-d * 1.05) * shield * (c >= 27 ? .7 : 1))}"></i>`);
+  }
+  document.getElementById('heat').innerHTML = cells.join('');
+
+  addEventListener('resize', fit);
+  fit();
+  const start = parseInt(location.hash.slice(1), 10);
+  go(Number.isInteger(start) && start > 0 ? start - 1 : 0);
+})();
+</script>
+</body>
+</html>
