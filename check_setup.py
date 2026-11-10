@@ -18,11 +18,9 @@ EXPECTED_DATA = [
     "iter_1d/outp",
     "iter_1d/mctal",
     "iter_1d/meshtal",
-    "iter_1d/iter1D.stl",
     "sphere/Sphere.i",
     "sphere/filler.i",
     "ww/ww_simple_cart",
-    "extra/meshtal_cuv",
     "extra/meshtal_transform",
     "extra/transforms.i",
     "extra/test_lp_u.o",
@@ -40,10 +38,9 @@ REQUIRED_MODULES = [
     "pyvista",
 ]
 
-# Only needed by notebooks 03, 04 and 05; a missing one is a warning, not a failure.
+# Only needed by notebooks 03 and 05; a missing one is a warning, not a failure.
 OPTIONAL_MODULES = {
     "openpyxl": "writing the QA report to .xlsx (notebook 03)",
-    "docx": "building the Word atlas (notebook 04)",
     "pypact": "reading FISPACT-II output files (notebook 05)",
 }
 

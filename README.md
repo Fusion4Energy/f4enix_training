@@ -17,7 +17,7 @@ library (`xsdir`) installed: all the MCNP files used during the session are alre
 | 01 | `01_reading_and_editing_an_mcnp_input.ipynb` | Read a model, inspect cells/surfaces, carve out a sub-model, merge universes | ~30 min |
 | 02 | `02_materials_tallies_and_run_settings.ipynb` | Materials, library translation, densities, tallies, NPS, void check | ~30 min |
 | 03 | `03_parsing_outp_and_mctal.ipynb` | Is the run trustworthy? Warnings, tables, statistical checks, lost particles, tally results | ~30 min |
-| 04 | `04_mesh_tallies_plots_and_weight_windows.ipynb` | Mesh tallies to VTK, slice plots, Word atlas, weight windows and GVR | ~30 min |
+| 04 | `04_mesh_tallies_and_weight_windows.ipynb` | Mesh tallies to VTK, merging and transforming meshes, weight windows and GVR | ~30 min |
 | 05 | `05_fispact_activation_studies.ipynb` | FISPACT activation: spectrum, collapse/condense and inventory inputs; dose, decay heat, activity and pathways from the output | ~25 min |
 
 Each notebook ends with one or two exercises. Solutions are in [`solutions/`](solutions) —
@@ -32,14 +32,14 @@ representation of the ITER tokamak. You will follow it through a realistic workf
 ITER_1D.i  ──(01, 02)──►  modified input  ──(MCNP, already run for you)──►  outp / mctal / meshtal
                                                                                 │
                                                                        (03, 04) ▼
-                                                             QA report, spectra, VTK, atlas, GVR
+                                                             QA report, spectra, VTK, GVR
                                                                                 │
                                                                           (05)  ▼
                                                         FISPACT inputs, dose, decay heat, pathways
 ```
 
-A couple of side files (a tiny sphere model, a CuV mesh tally, an output full of lost particles,
-a FISPACT-II output) are used where the ITER_1D model does not show a given feature.
+A couple of side files (a tiny sphere model, a transformed mesh tally, an output full of lost
+particles, a FISPACT-II output) are used where the ITER_1D model does not show a given feature.
 
 ## Setup
 
@@ -69,16 +69,15 @@ Now you are ready to move to the [first notebook](notebooks/00_setup_and_python_
 ```
 f4enix_workshop/
   data/                 MCNP files used by the notebooks (read-only, do not edit)
-    iter_1d/            the main case study: input, outp, mctal, meshtal, geometry STL
+    iter_1d/            the main case study: input, outp, mctal, meshtal
     sphere/             tiny model used for the universe/merge demo
     ww/                 an existing weight window file
-    extra/              side files: CuV mesh, transformed mesh, lost-particle output
+    extra/              side files: transformed mesh, lost-particle output
     fispact/            a FISPACT fluxes file, a FISPACT input and a FISPACT-II output
   notebooks/            the five workshop notebooks (+ notebook 00)
   solutions/            worked solutions to the exercises
   outputs/              everything the notebooks write ends up here
   check_setup.py        pre-flight check
-  requirements.txt      Python dependencies
 ```
 
 `outputs/` starts empty. You can delete its contents at any time and re-run the notebooks.
