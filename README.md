@@ -1,6 +1,6 @@
 # F4Enix hands-on workshop
 
-A roughly 2.5 hours training on [F4Enix](https://f4enix.readthedocs.io/en/latest/): a Python API to read,
+A training on [F4Enix](https://f4enix.readthedocs.io/en/latest/): a Python API to read,
 build and post-process MCNP models.
 
 The training consists of five notebooks in [`notebooks/`](notebooks).
@@ -19,27 +19,12 @@ library (`xsdir`) installed: all the MCNP files used during the session are alre
 | 03 | `03_parsing_outp_and_mctal.ipynb` | Is the run trustworthy? Warnings, tables, statistical checks, lost particles, tally results | ~30 min |
 | 04 | `04_mesh_tallies_and_weight_windows.ipynb` | Mesh tallies to VTK, merging and transforming meshes, weight windows and GVR | ~30 min |
 | 05 | `05_fispact_activation_studies.ipynb` | FISPACT activation: spectrum, collapse/condense and inventory inputs; dose, decay heat, activity and pathways from the output | ~25 min |
+| 06 | `06_d1suned_study.ipynb` | set up a complete d1suned study | ~45 min |
 
-Each notebook ends with one or two exercises. Solutions are in [`solutions/`](solutions) —
+Many of the notebooks ends with one or two exercises. Solutions are in [`solutions/`](solutions) —
 try the exercise first!
 
-## The case study
-
-All the notebooks work on the **same model**: `ITER_1D`, a simplified 1-D cylindrical
-representation of the ITER tokamak. You will follow it through a realistic workflow:
-
-```
-ITER_1D.i  ──(01, 02)──►  modified input  ──(MCNP, already run for you)──►  outp / mctal / meshtal
-                                                                                │
-                                                                       (03, 04) ▼
-                                                             QA report, spectra, VTK, GVR
-                                                                                │
-                                                                          (05)  ▼
-                                                        FISPACT inputs, dose, decay heat, pathways
-```
-
-A couple of side files (a tiny sphere model, a transformed mesh tally, an output full of lost
-particles, a FISPACT-II output) are used where the ITER_1D model does not show a given feature.
+Have a look also at the [F4Enix introduction](F4Enix_introduction.html) slides to get a feeling on why you should learn how to use F4Enix.
 
 ## Setup
 
@@ -63,33 +48,6 @@ python check_setup.py
 You should see a version number for F4Enix and `ALL CHECKS PASSED`.
 
 Now you are ready to move to the [first notebook](notebooks/00_setup_and_python_refresher.ipynb).
-
-## Folder layout
-
-```
-f4enix_workshop/
-  data/                 MCNP files used by the notebooks (read-only, do not edit)
-    iter_1d/            the main case study: input, outp, mctal, meshtal
-    sphere/             tiny model used for the universe/merge demo
-    ww/                 an existing weight window file
-    extra/              side files: transformed mesh, lost-particle output
-    fispact/            a FISPACT fluxes file, a FISPACT input and a FISPACT-II output
-  notebooks/            the five workshop notebooks (+ notebook 00)
-  solutions/            worked solutions to the exercises
-  outputs/              everything the notebooks write ends up here
-  check_setup.py        pre-flight check
-```
-
-`outputs/` starts empty. You can delete its contents at any time and re-run the notebooks.
-
-## Conventions used in the notebooks
-
-* Every notebook is **independent**: it re-loads what it needs, so you can join late or redo
-  one notebook without the others.
-* Cells that would open a blocking 3-D window (`.plot()`) are **commented out**. Uncomment them
-  only if you want to explore interactively — close the window to let the notebook continue.
-* Exercises are marked **EXERCISE** and contain `# TODO` lines. The cell right after each
-  exercise contains `assert` statements that tell you whether your answer is correct.
 
 ## Troubleshooting
 
